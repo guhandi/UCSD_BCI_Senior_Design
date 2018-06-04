@@ -8,14 +8,14 @@ tic
 fs=250;
 startsample=525;
 windowsize=975;
-featdim=8;
-baseclass=2;
+featdim=24;
+baseclass=1;
 %baseclass and noclass are numbers between 1 and 4, can't be same number
 noclass=3;
-x=1;
-Fpass1=7;
+x=4;
+Fpass1=27;
 Fstop1=Fpass1-3;
-Fpass2=13;
+Fpass2=33;
 Fstop2=Fpass2+3;
 freqstep=5;
 
@@ -25,8 +25,8 @@ numbtrials=130;
 
 %numbtrials indicates how many trials will be used in the training set
 %the number of trials in the crossval set equals total trials-numbtrials
-%{
-[combined, combinedlabels]= get_data_A0xT(noclass,windowsize,startsample);
+%
+[combined, combinedlabels]= get_data_A0xT(noclass,windowsize,startsample,x);
 
 crossval=[];
 crossvallabels=[];
@@ -37,9 +37,22 @@ crossvallabels=combinedlabels(windowsize*numbtrials+1:end);
 combined=combined(1:windowsize*numbtrials,:);
 combinedlabels=combinedlabels(1:windowsize*numbtrials);
 %}
-%}
-%crossval=combined;
-%crossvallabels=combinedlabels;
+classalg=1;
+[crossvalidationaccuracy, trainingfeats, labels, predictions]= bcimain(combined, combinedlabels, crossval, crossvallabels, fs, windowsize, featdim, baseclass,Fstop1,Fpass1,Fpass2,Fstop2,classalg);
+%{
+[X,Y]=rocconvert(labels,predictions,1);
+[X2,Y2]=rocconvert(labels,predictions,2);
+[X3,Y3]=rocconvert(labels,predictions,4);
+figure
+hold on
+plot(X,Y)
+
+plot(X2,Y2)
+num2str(x)
+plot(X3,Y3)
+title(['ROC Curves for Positive Cases of Classes 1,2,3 in Subject ' num2str(x)])
+legend('Class 1','Class 2','Class 3')
+confusionmat(labels,predictions)
 %}
 %if bcimain is ran without crossvalset or crossvallabels,
 %crossvalidationaccuracy will return as 0
@@ -47,7 +60,7 @@ combinedlabels=combinedlabels(1:windowsize*numbtrials);
 
 %code below iterates through each class and cspbase combination
 
-%
+%{
 besttot=[];
 accs=[];
 for x=1:5
@@ -157,7 +170,7 @@ vectot=[valAcc; pass1vec; pass2vec];
 %}
 
 
-%
+%{
 
 featdim=30;
 classalg=2;
@@ -209,7 +222,8 @@ bestnc=vectot2(4,index);
 best=[bestpass1 bestpass2 bestnc bestbase bestbase2];
 besttot=[besttot; best];
 accs=[accs; maxacc];
+end
 
 %}
-end
+
 toc

@@ -1,10 +1,14 @@
-function feats= extract_feats2(rawdata, numchannels, fs, featdim, P,Fstop1,Fpass1,Fpass2,Fstop2)
+function feats= extract_feats2(rawdata, numchannels, fs, featdim, P1,P2,P3,Fstop1,Fpass1,Fpass2,Fstop2)
 
 feats=[];
 Hdalpha= alphabut(Fstop1,Fpass1,Fpass2,Fstop2);
 alphaband= filter(Hdalpha, rawdata);
-cspfiltered=alphaband*P;
+cspfiltered=alphaband*P1;
 feats=transpose(log(bandpower(cspfiltered)));
+cspfilt2=alphaband*P2;
+cspfilt3=alphaband*P3;
+feats=[feats; log(transpose(bandpower(cspfilt2)))];
+feats=[feats; log(transpose(bandpower(cspfilt3)))];
 
 %}
 %{
